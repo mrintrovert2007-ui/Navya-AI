@@ -1,25 +1,19 @@
-from agents.desktop_agent import open_notepad, open_calculator
+from agents.desktop_agent import open_application
+from agents.browser_agent import open_website, google_search
 
 
 def execute(action):
 
     if action["action"] == "open_app":
+        return open_application(action["app"])
 
-        app = action["app"]
+    elif action["action"] == "open_website":
+        return open_website(action["website"])
 
-        if app == "notepad":
-            open_notepad()
-            return "Opening Notepad..."
-
-        elif app == "calculator":
-            open_calculator()
-            return "Opening Calculator..."
-
-        else:
-            return f"I don't know how to open {app}."
+    elif action["action"] == "search_google":
+        return google_search(action["query"])
 
     elif action["action"] == "chat":
         return action["message"]
 
-    else:
-        return "Unknown action."
+    return "Unknown action."

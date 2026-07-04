@@ -1,6 +1,14 @@
 {
     "notepad": "notepad.exe",
     "calculator": "calc.exe",
+    "paint": "mspaint.exe",
+    "cmd": "cmd.exe",
+    "powershell": "powershell.exe",
+    "explorer": "explorer.exe",
+    "taskmanager": "taskmgr.exe",
+    "controlpanel": "control.exe",
+    "settings": "ms-settings:",
     "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
     "vscode": "C:\\Users\\Pranav\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
 }

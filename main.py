@@ -1,6 +1,5 @@
 from llm.model import ask_navya
-from router.router import execute
-
+from router.action_router import execute
 print("=" * 40)
 print("        Welcome to Navya AI")
 print("=" * 40)
