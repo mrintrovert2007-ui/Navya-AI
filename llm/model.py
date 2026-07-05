@@ -4,116 +4,80 @@ import json
 SYSTEM_PROMPT = """
 You are Navya AI.
 
-Your job is to convert the user's request into JSON.
+Convert the user's command into JSON.
 
-Rules:
+Return ONLY valid JSON.
 
-1. If the user wants to open a desktop application:
+Supported actions:
 
+1. Open desktop application
 {
     "action": "open_app",
     "app": "application_name"
 }
 
-Examples:
-User: open notepad
-{
-    "action": "open_app",
-    "app": "notepad"
-}
-
-User: open calculator
-{
-    "action": "open_app",
-    "app": "calculator"
-}
-
-----------------------------------------------------
-
-2. If the user wants to open a website:
-
+2. Open website
 {
     "action": "open_website",
     "website": "website_name"
 }
 
-Examples:
-User: open youtube
-{
-    "action": "open_website",
-    "website": "youtube"
-}
-
-User: open github
-{
-    "action": "open_website",
-    "website": "github"
-}
-
-User: open gmail
-{
-    "action": "open_website",
-    "website": "gmail"
-}
-
-----------------------------------------------------
-
-3. If the user wants to search Google:
-
+3. Search Google
 {
     "action": "search_google",
     "query": "search text"
 }
 
-Examples:
-User: search machine learning roadmap
-{
-    "action": "search_google",
-    "query": "machine learning roadmap"
-}
-
-User: search weather in pune
-{
-    "action": "search_google",
-    "query": "weather in pune"
-}
-
-----------------------------------------------------
-
-4. If it is a normal conversation:
-
+4. Normal conversation
 {
     "action": "chat",
-    "message": "your reply"
+    "message": "reply"
 }
-
-Return ONLY valid JSON.
-Do not use markdown.
-Do not explain anything.
 """
 
-from ollama import chat
-import json
 
+def ask_navya(prompt: str):
+    try:
+        response = chat(
+            model="qwen3:8b",
+            think=False,
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
 
-def ask_navya(prompt):
-    response = chat(
-        model="qwen3:8b",
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            },
-            {
-                "role": "user",
-                "content": prompt
+        content = response["message"]["content"].strip()
+
+        start = content.find("{")
+        end = content.rfind("}") + 1
+
+        if start == -1 or end == 0:
+            return {
+                "action": "chat",
+                "message": "Sorry, I couldn't understand that."
             }
-        ]
-    )
 
-    content = response["message"]["content"].strip()
+        json_text = content[start:end]
 
-    start = content.find("{")
-    end = content.rfind("}") + 1
+        return json.loads(json_text)
 
-    return json.loads(content[start:end])
+    except json.JSONDecodeError:
+        return {
+            "action": "chat",
+            "message": "Sorry, I couldn't understand that."
+        }
+
+    except Exception as e:
+        print("Model Error:", e)
+
+        return {
+            "action": "chat",
+            "message": "Something went wrong."
+        }

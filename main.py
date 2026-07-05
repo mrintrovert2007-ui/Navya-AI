@@ -1,19 +1,23 @@
-from llm.model import ask_navya
-from router.action_router import execute
+from assistant import process_command
+from agents.voice_agent import start_voice
+
 print("=" * 40)
 print("        Welcome to Navya AI")
 print("=" * 40)
 
-while True:
+mode = input("Choose mode (text/voice): ").strip().lower()
 
-    command = input("\nYou: ")
+if mode == "voice":
+    start_voice()
 
-    if command.lower() == "exit":
-        print("Goodbye!")
-        break
+else:
+    while True:
+        command = input("\nYou: ")
 
-    action = ask_navya(command)
+        if command.lower() == "exit":
+            print("Goodbye!")
+            break
 
-    result = execute(action)
+        result = process_command(command)
 
-    print("\nNavya:", result)
+        print("\nNavya:", result)
