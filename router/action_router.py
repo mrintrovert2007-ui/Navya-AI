@@ -9,6 +9,16 @@ from agents.mouse_agent import (
     scroll_down,
     get_mouse_position,
 )
+from agents.keyboard_agent import (
+    type_text,
+    press_key,
+    hotkey,
+    press_enter,
+    press_tab,
+    press_backspace,
+    press_delete,
+    press_escape,
+)
 
 
 def execute(action):
@@ -56,6 +66,28 @@ def execute(action):
     elif action_type == "chat":
         return action["message"]
 
-    # ---------- Unknown ----------
+    # ---------- keyboard ----------
+    elif action_type == "type_text":
+        return type_text(action["text"])
 
+    elif action_type == "press_key":
+        return press_key(action["key"])
+
+    elif action_type == "hotkey":
+        return hotkey(*action["keys"])
+
+    elif action_type == "enter":
+        return press_enter()
+
+    elif action_type == "tab":
+        return press_tab()
+
+    elif action_type == "backspace":
+        return press_backspace()
+
+    elif action_type == "delete":
+        return press_delete()
+
+    elif action_type == "escape":
+        return press_escape()
     return "Unknown action."

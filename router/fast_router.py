@@ -86,6 +86,25 @@ def fast_route(command: str):
             "action": "mouse_position"
         }
 
-    # ---------------- No Match ---------------- #
+    # ---------------- keyboard ---------------- #
+    if command == "enter":
+        return {"action": "enter"}
 
+    if command == "tab":
+        return {"action": "tab"}
+
+    if command == "backspace":
+        return {"action": "backspace"}
+
+    if command == "delete":
+        return {"action": "delete"}
+
+    if command == "escape":
+        return {"action": "escape"}
+
+    if command.startswith("type "):
+        return {
+            "action": "type_text",
+         "text": command[5:]
+        }
     return None
