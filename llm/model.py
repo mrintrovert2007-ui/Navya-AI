@@ -2,82 +2,52 @@ from ollama import chat
 import json
 
 SYSTEM_PROMPT = """
-You are Navya AI.
+You are Navya, a highly intelligent desktop automation AI assistant.
+You interpret user inputs and map them out into executable system commands.
 
-Convert the user's command into JSON.
+You must respond exclusively in valid JSON format.
 
-Return ONLY valid JSON.
+Supported actions format:
 
-Supported actions:
-
-1. Open desktop application
+1. Open Desktop Applications:
 {
     "action": "open_app",
-    "app": "application_name"
+    "app": "app_name"
 }
 
-2. Open website
+2. Click a dynamic visual element or button on the screen using Vision:
 {
-    "action": "open_website",
-    "website": "website_name"
+    "action": "vision_click",
+    "element": "precise description of what to find (e.g., 'the close icon on the top right', 'the profile picture icon', 'the red cancel button')"
 }
 
-3. Search Google
-{
-    "action": "search_google",
-    "query": "search text"
-}
-
-4. Normal conversation
+3. Chat / Final Response:
 {
     "action": "chat",
-    "message": "reply"
+    "message": "Your conversation text here"
 }
-"""
 
+Rules:
+- If a user asks to click on an interface component that cannot be targeted cleanly via terminal scripting or shortcuts, default immediately to the "vision_click" action.
+- Describe the 'element' clearly so the background visual subsystem can parse it out from screenshot buffers.
+"""
 
 def ask_navya(prompt: str):
     try:
         response = chat(
-            model="qwen3:8b",
-            think=False,
+            model="qwen:8b", # Make sure this matches your installed model
             messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            format="json"  # <-- FORCES VALID JSON OUTPUT
         )
-
-        content = response["message"]["content"].strip()
-
-        start = content.find("{")
-        end = content.rfind("}") + 1
-
-        if start == -1 or end == 0:
-            return {
-                "action": "chat",
-                "message": "Sorry, I couldn't understand that."
-            }
-
-        json_text = content[start:end]
-
-        return json.loads(json_text)
+        
+        # Directly parse without string slicing
+        return json.loads(response["message"]["content"].strip())
 
     except json.JSONDecodeError:
-        return {
-            "action": "chat",
-            "message": "Sorry, I couldn't understand that."
-        }
-
+        return {"action": "chat", "message": "Sorry, I couldn't understand that."}
     except Exception as e:
         print("Model Error:", e)
-
-        return {
-            "action": "chat",
-            "message": "Something went wrong."
-        }
+        return {"action": "chat", "message": "Something went wrong."}

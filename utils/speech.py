@@ -1,53 +1,23 @@
-import sounddevice as sd
 import soundfile as sf
 from faster_whisper import WhisperModel
+from utils.recorder import record_until_silence, SAMPLE_RATE
 
 print("Loading Whisper model...")
-
-model = WhisperModel(
-    "base",
-    device="cpu",
-    compute_type="int8"
-)
-
+model = WhisperModel("base", device="cpu", compute_type="int8")
 print("Whisper model loaded!")
 
-SAMPLE_RATE = 16000
-DURATION = 5
-
-
 def listen():
-    print("🎤 Listening...")
+    # Use your VAD function instead of hardcoded 5 seconds
+    audio_data = record_until_silence()
+    
+    if len(audio_data) == 0:
+        return ""
 
-    audio = sd.rec(
-        int(DURATION * SAMPLE_RATE),
-        samplerate=SAMPLE_RATE,
-        channels=1,
-        dtype="float32",
-    )
+    # Save temporary file (or pass numpy array directly if supported by your faster_whisper version)
+    sf.write("recording.wav", audio_data, SAMPLE_RATE)
 
-    sd.wait()
+    segments, info = model.transcribe("recording.wav", language="en", beam_size=5)
 
-    sf.write("recording.wav", audio, SAMPLE_RATE)
-
-    segments, info = model.transcribe(
-        "recording.wav",
-        language="en",
-        beam_size=5
-    )
-
-    text = ""
-
-    for segment in segments:
-        print(f"[{segment.start:.2f} - {segment.end:.2f}] {segment.text}")
-        text += segment.text
-
-    text = text.strip()
-
+    text = " ".join([segment.text for segment in segments]).strip()
     print(f"\nFinal Text: {text}")
-
     return text
-
-
-if __name__ == "__main__":
-    listen()
